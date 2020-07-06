@@ -201,11 +201,9 @@ int employee_funcionCriterio(void* item1, void* item2)
 		if(strcmp(nombre1,nombre2) > 1)
 		{
 			retorno = 1;
+			strcpy(nombre2,nombre1);
 		}
-		else if(strcmp(nombre1,nombre2) < 0)
-		{
-			retorno =-1;
-		}
+
 	}
 
 

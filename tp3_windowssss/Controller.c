@@ -6,6 +6,12 @@
 #include "utn.h"
 
 
+/*No modifica, no da de baja y no ordena.
+ *  El modificar y la baja no funcionan correctamente porque sólo se queda con el último empleado al recorrer y evalua si ese es el que coincide con el id buscado.
+ *  En el ordenamiento hay un error en la validación del retorno del ll_sort. No debe haber operadores flecha por todos lados, se deben usar los getters y setters.
+ *   Error en la validación del path en ambos save: primero abre el archivo despues valida que no sea nulo.
+ * */
+
 /** \brief Carga los datos de los empleados desde el archivo data.csv (modo texto).
  *
  * \param path char*
@@ -114,6 +120,8 @@ int controller_addEmployee(LinkedList* pArrayListEmployee)
  * \return int
  *
  */
+
+//El modificar y la baja no funcionan correctamente porque sólo se queda con el último empleado al recorrer y evalua si ese es el que coincide con el id buscado.
 int controller_editEmployee(LinkedList* pArrayListEmployee)
 {
 	int retorno = -1;
@@ -123,6 +131,8 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 	char nombreMod[NOMBRE_LEN];
 	int i;
 	int menuMod;
+	int opcion = 0;
+
 	Employee* bufferEmpleado;
 
 	printf(":::::MODIFICAR EMPLEADO:::::\n");
@@ -132,44 +142,49 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			bufferEmpleado = ll_get(pArrayListEmployee,i);
-		}
-		if(!employee_getId(bufferEmpleado,&idMod) && bufferEmpleado != NULL)
-		{
-			employee_printAll(bufferEmpleado,pArrayListEmployee);
-			utn_getNumero(&idMod,"Ingrese id del cliente a modificar\n","Error id inexistente\n",0,1000,2);
-			if(idMod == bufferEmpleado->id )
+
+			if(!employee_getId(bufferEmpleado,&idMod) && bufferEmpleado != NULL)
 			{
-				printf("1. Modificar nombre\n");
-				printf("2. Modificar horas trabajadas\n");
-				printf("3. Modificar sueldo\n");
-				utn_getNumero(&menuMod,"Ingrese una opcion\n","Error\n,",1,1000,2);
-				switch(menuMod)
-				{
-					case 1:
-						utn_getNombre(nombreMod,NOMBRE_LEN,"Ingrese nuevo nombre\n","Error al modificar\n",2);
-						if(employee_setNombre(bufferEmpleado,nombreMod)==0 && ll_get(pArrayListEmployee,i))
+				employee_printAll(bufferEmpleado,pArrayListEmployee);
+				utn_getNumero(&idMod,"Ingrese id del cliente a modificar\n","Error id inexistente\n",0,1000,2);
+					do
+					{
+
+						printf("1. Modificar nombre\n");
+						printf("2. Modificar horas trabajadas\n");
+						printf("3. Modificar sueldo\n");
+						printf("4. salir\n");
+						utn_getNumero(&menuMod,"Ingrese una opcion\n","Error\n,",1,5,2);
+						switch(menuMod)
 						{
-							printf("Nombre modificado con exito\n");
-							retorno = 0;
+							case 1:
+								utn_getNombre(nombreMod,NOMBRE_LEN,"Ingrese nuevo nombre\n","Error al modificar\n",2);
+								if(employee_setNombre(bufferEmpleado,nombreMod)==0 && ll_get(pArrayListEmployee,i))
+								{
+									printf("Nombre modificado con exito\n");
+								}
+								break;
+							case 2:
+								utn_getNumero(&horasTrabajadasMod,"Ingrese nueva cantidad de horas trabajdas\n","Error al modificar\n",0,1000,2);
+								if(employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod)==0 && ll_get(pArrayListEmployee,i))
+								{
+									printf("Nombre modificado con exito\n");
+
+								}
+								break;
+							case 3:
+								utn_getNumero(&sueldoMod,"Ingrese nuevo sueldo\n","Error al modificar\n",0,1000,2);
+								if(employee_setSueldo(bufferEmpleado,sueldoMod)==0 && ll_get(pArrayListEmployee,i))
+								{
+									printf("Nombre modificado con exito\n");
+
+								}
+								break;
+							case 4:
+								opcion = 1;
+								break;
 						}
-						break;
-					case 2:
-						utn_getNumero(&horasTrabajadasMod,"Ingrese nueva cantidad de horas trabajdas\n","Error al modificar\n",0,1000,2);
-						if(employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod)==0 && ll_get(pArrayListEmployee,i))
-						{
-							printf("Nombre modificado con exito\n");
-							retorno = 0;
-						}
-						break;
-					case 3:
-						utn_getNumero(&sueldoMod,"Ingrese nuevo sueldo\n","Error al modificar\n",0,1000,2);
-						if(employee_setSueldo(bufferEmpleado,sueldoMod)==0 && ll_get(pArrayListEmployee,i))
-						{
-							printf("Nombre modificado con exito\n");
-							retorno = 0;
-						}
-						break;
-				}
+					}while(opcion != 1);
 			}
 		}
 	}
@@ -196,21 +211,22 @@ int controller_removeEmployee(LinkedList* pArrayListEmployee)
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			bufferEmpleado = ll_get(pArrayListEmployee,i);
-		}
-		if(!employee_getId(bufferEmpleado,&idAux) && bufferEmpleado != NULL)
-		{
-			employee_printAll(bufferEmpleado,pArrayListEmployee);
-			utn_getNumero(&idAux,"Ingrese el id a eliminar\n","Error, id inexistente\n",0,1000,2);
-			if(idAux == bufferEmpleado->id)
+
+			if(!employee_getId(bufferEmpleado,&idAux) && bufferEmpleado != NULL)
 			{
-				bufferEmpleado = ll_pop(pArrayListEmployee,i);
-				if(!employee_delete(bufferEmpleado))
+				employee_printAll(bufferEmpleado,pArrayListEmployee);
+				if(!utn_getNumero(&idAux,"Ingrese el id a eliminar\n","Error, id inexistente\n",0,1000,2))
 				{
-					printf("Baja exitosa\n");
+					bufferEmpleado = ll_pop(pArrayListEmployee,i);
+					if(!employee_delete(bufferEmpleado))
+					{
+						printf("Baja exitosa\n");
+						break;
+					}
 				}
+				else
+					printf("Id inexistente\n");
 			}
-			else
-				printf("Id inexistente\n");
 		}
 		retorno = 0;
 	}
@@ -253,11 +269,16 @@ int controller_ListEmployee(LinkedList* pArrayListEmployee)
  */
 int controller_sortEmployee(LinkedList* pArrayListEmployee)
 {
+	int opcion;
 	int retorno = -1;
-	if(pArrayListEmployee != NULL && ll_sort(pArrayListEmployee,employee_funcionCriterio,1))
+
+	if(!utn_getNumero(&opcion,"ingrese el tipo de ordenamiento\n", "error\n",0,1,2))
 	{
-		retorno = 0;
-		printf("Se ordeno correctamente\n");
+		if(pArrayListEmployee != NULL && ll_sort(pArrayListEmployee,employee_funcionCriterio,opcion))
+		{
+			retorno = 0;
+			printf("Se ordeno correctamente\n");
+		}
 	}
 	else
 	{
