@@ -6,12 +6,6 @@
 #include "utn.h"
 
 
-/*No modifica, no da de baja y no ordena.
- *  El modificar y la baja no funcionan correctamente porque sólo se queda con el último empleado al recorrer y evalua si ese es el que coincide con el id buscado.
- *  En el ordenamiento hay un error en la validación del retorno del ll_sort. No debe haber operadores flecha por todos lados, se deben usar los getters y setters.
- *   Error en la validación del path en ambos save: primero abre el archivo despues valida que no sea nulo.
- * */
-
 /** \brief Carga los datos de los empleados desde el archivo data.csv (modo texto).
  *
  * \param path char*
@@ -159,23 +153,26 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 						{
 							case 1:
 								utn_getNombre(nombreMod,NOMBRE_LEN,"Ingrese nuevo nombre\n","Error al modificar\n",2);
-								if(employee_setNombre(bufferEmpleado,nombreMod)==0 && ll_get(pArrayListEmployee,i))
+								if(!ll_get(pArrayListEmployee,i))
 								{
 									printf("Nombre modificado con exito\n");
+									employee_setNombre(bufferEmpleado,nombreMod);
 								}
 								break;
 							case 2:
 								utn_getNumero(&horasTrabajadasMod,"Ingrese nueva cantidad de horas trabajdas\n","Error al modificar\n",0,1000,2);
-								if(employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod)==0 && ll_get(pArrayListEmployee,i))
+								if(!ll_get(pArrayListEmployee,i))
 								{
+									employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod);
 									printf("Nombre modificado con exito\n");
 
 								}
 								break;
 							case 3:
 								utn_getNumero(&sueldoMod,"Ingrese nuevo sueldo\n","Error al modificar\n",0,1000,2);
-								if(employee_setSueldo(bufferEmpleado,sueldoMod)==0 && ll_get(pArrayListEmployee,i))
+								if(!ll_get(pArrayListEmployee,i))
 								{
+									employee_setSueldo(bufferEmpleado,sueldoMod);
 									printf("Nombre modificado con exito\n");
 
 								}
@@ -224,8 +221,6 @@ int controller_removeEmployee(LinkedList* pArrayListEmployee)
 						break;
 					}
 				}
-				else
-					printf("Id inexistente\n");
 			}
 		}
 		retorno = 0;
@@ -304,11 +299,11 @@ int controller_saveAsText(char* path , LinkedList* pArrayListEmployee)
 	int sueldo;
 	char nombre[NOMBRE_LEN];
 	Employee* bufferEmpleado =employee_new();
-	FILE* pF;
-	pF = fopen(path,"w");
+	FILE* pF = NULL;
 
-	if(path != NULL && pArrayListEmployee != NULL && pF != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && pF != NULL && pF != NULL)
 	{
+		pF = fopen(path,"w");
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			if(i==0)
@@ -353,11 +348,12 @@ int controller_saveAsBinary(char* path , LinkedList* pArrayListEmployee)
 	int retorno = -1;
 	int i;
 	Employee* bufferEmpleado;
-	FILE* pF;
-	pF = fopen(path,"wb");
+	FILE* pF = NULL;
+
 
 	if(path != NULL && pArrayListEmployee != NULL && pF != NULL)
 	{
+		pF = fopen(path,"wb");
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			bufferEmpleado = ll_get(pArrayListEmployee,i);
