@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "LinkedList.h"
 #include "Employee.h"
+#include "Controller.h"
 #include "parser.h"
 #include "utn.h"
 
@@ -122,69 +123,60 @@ int controller_editEmployee(LinkedList* pArrayListEmployee)
 	int idMod;
 	int horasTrabajadasMod;
 	int sueldoMod;
+	int tam = ll_len(pArrayListEmployee);
 	char nombreMod[NOMBRE_LEN];
 	int i;
-	int menuMod;
 	int opcion = 0;
-
 	Employee* bufferEmpleado;
 
 	printf(":::::MODIFICAR EMPLEADO:::::\n");
-
-	if(pArrayListEmployee != NULL)
-	{
-		for(i=0;i<ll_len(pArrayListEmployee);i++)
+	if(!controller_ListEmployee(pArrayListEmployee)&&
+	   !utn_getNumero(&idMod,"ingrese id a modificar\n","error\n",1,tam,2)&&
+	   (i = employee_printPorId(pArrayListEmployee,idMod))>= 0)
 		{
+
+			printf("1. Modificar nombre\n");
+			printf("2. Modificar horas trabajadas\n");
+			printf("3. Modificar sueldo\n");
+			printf("4. salir\n");
+			utn_getNumero(&opcion,"Ingrese una opcion\n","Error\n,",1,4,2);
 			bufferEmpleado = ll_get(pArrayListEmployee,i);
-
-			if(!employee_getId(bufferEmpleado,&idMod) && bufferEmpleado != NULL)
+			switch(opcion)
 			{
-				employee_printAll(bufferEmpleado,pArrayListEmployee);
-				utn_getNumero(&idMod,"Ingrese id del cliente a modificar\n","Error id inexistente\n",0,1000,2);
-					do
+				case 1:
+					if(!utn_getNombre(nombreMod,NOMBRE_LEN,"Ingrese nuevo nombre\n","Error al modificar\n",2))
 					{
+						printf("Nombre modificado con exito\n");
+						employee_setNombre(bufferEmpleado,nombreMod);
+						ll_set(pArrayListEmployee,i,bufferEmpleado);
+						retorno = 0;
+					}
+					break;
+				case 2:
+					if(!utn_getNumero(&horasTrabajadasMod,"Ingrese nueva cantidad de horas trabajdas\n","Error al modificar\n",0,1000,2))
+					{
+						employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod);
+						ll_set(pArrayListEmployee,i,bufferEmpleado);
+						printf("Nombre modificado con exito\n");
+						retorno = 0;
 
-						printf("1. Modificar nombre\n");
-						printf("2. Modificar horas trabajadas\n");
-						printf("3. Modificar sueldo\n");
-						printf("4. salir\n");
-						utn_getNumero(&menuMod,"Ingrese una opcion\n","Error\n,",1,5,2);
-						switch(menuMod)
-						{
-							case 1:
-								utn_getNombre(nombreMod,NOMBRE_LEN,"Ingrese nuevo nombre\n","Error al modificar\n",2);
-								if(!ll_get(pArrayListEmployee,i))
-								{
-									printf("Nombre modificado con exito\n");
-									employee_setNombre(bufferEmpleado,nombreMod);
-								}
-								break;
-							case 2:
-								utn_getNumero(&horasTrabajadasMod,"Ingrese nueva cantidad de horas trabajdas\n","Error al modificar\n",0,1000,2);
-								if(!ll_get(pArrayListEmployee,i))
-								{
-									employee_setHorasTrabajadas(bufferEmpleado,horasTrabajadasMod);
-									printf("Nombre modificado con exito\n");
-
-								}
-								break;
-							case 3:
-								utn_getNumero(&sueldoMod,"Ingrese nuevo sueldo\n","Error al modificar\n",0,1000,2);
-								if(!ll_get(pArrayListEmployee,i))
-								{
-									employee_setSueldo(bufferEmpleado,sueldoMod);
-									printf("Nombre modificado con exito\n");
-
-								}
-								break;
-							case 4:
-								opcion = 1;
-								break;
-						}
-					}while(opcion != 1);
+					}
+					break;
+				case 3:
+					if(!utn_getNumero(&sueldoMod,"Ingrese nuevo sueldo\n","Error al modificar\n",0,1000,2))
+					{
+						employee_setSueldo(bufferEmpleado,sueldoMod);
+						ll_set(pArrayListEmployee,i,bufferEmpleado);
+						printf("Nombre modificado con exito\n");
+						retorno = 0;
+					}
+					break;
+				case 4:
+					opcion = 1;
+					break;
 			}
+
 		}
-	}
     return retorno;
 }
 
@@ -200,30 +192,21 @@ int controller_removeEmployee(LinkedList* pArrayListEmployee)
 	int retorno = -1;
 	int i;
 	int idAux;
+	int tam = ll_len(pArrayListEmployee);
 	Employee* bufferEmpleado;
 
 	if(pArrayListEmployee != NULL)
 	{
 		printf(":::::Baja de empleado:::::\n");
-		for(i=0;i<ll_len(pArrayListEmployee);i++)
+		if(!controller_ListEmployee(pArrayListEmployee)&&
+		   !utn_getNumero(&idAux,"ingrese id a eliminar\n","error\n",1,tam,2)&&
+		   (i = employee_printPorId(pArrayListEmployee,idAux))>= 0)
 		{
-			bufferEmpleado = ll_get(pArrayListEmployee,i);
-
-			if(!employee_getId(bufferEmpleado,&idAux) && bufferEmpleado != NULL)
-			{
-				employee_printAll(bufferEmpleado,pArrayListEmployee);
-				if(!utn_getNumero(&idAux,"Ingrese el id a eliminar\n","Error, id inexistente\n",0,1000,2))
-				{
-					bufferEmpleado = ll_pop(pArrayListEmployee,i);
-					if(!employee_delete(bufferEmpleado))
-					{
-						printf("Baja exitosa\n");
-						break;
-					}
-				}
-			}
+			bufferEmpleado = (Employee*)ll_pop(pArrayListEmployee,i);
+			employee_delete(bufferEmpleado);
+			retorno = 0;
+			printf("Baja exitosa\n");
 		}
-		retorno = 0;
 	}
     return retorno;
 }
@@ -299,11 +282,12 @@ int controller_saveAsText(char* path , LinkedList* pArrayListEmployee)
 	int sueldo;
 	char nombre[NOMBRE_LEN];
 	Employee* bufferEmpleado =employee_new();
-	FILE* pF = NULL;
+	FILE* pF ;
+	pF=fopen(path,"w");
 
-	if(path != NULL && pArrayListEmployee != NULL && pF != NULL && pF != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && pF != NULL)
 	{
-		pF = fopen(path,"w");
+
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			if(i==0)
@@ -348,12 +332,13 @@ int controller_saveAsBinary(char* path , LinkedList* pArrayListEmployee)
 	int retorno = -1;
 	int i;
 	Employee* bufferEmpleado;
-	FILE* pF = NULL;
+	FILE* pF;
+	pF = fopen(path,"wb");
 
 
-	if(path != NULL && pArrayListEmployee != NULL && pF != NULL)
+	if(path != NULL && pArrayListEmployee != NULL && pF!= NULL)
 	{
-		pF = fopen(path,"wb");
+
 		for(i=0;i<ll_len(pArrayListEmployee);i++)
 		{
 			bufferEmpleado = ll_get(pArrayListEmployee,i);

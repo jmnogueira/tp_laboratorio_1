@@ -205,8 +205,6 @@ int employee_funcionCriterio(void* item1, void* item2)
 		}
 
 	}
-
-
 	return retorno;
 }
 
@@ -230,4 +228,25 @@ int menu(void)
 
 	return opcion;
 
+}
+
+int employee_printPorId( LinkedList* pArray, int idAux)
+{
+	int i;
+	int retorno = -1;
+	int id;
+	Employee* aux;
+
+
+	for(i=0;i<ll_len(pArray);i++)
+	{
+		aux=ll_get(pArray,i);
+		employee_getId(aux,&id);
+		if(id == idAux)
+		{
+			retorno = i;
+			break;
+		}
+	}
+	return retorno;
 }
